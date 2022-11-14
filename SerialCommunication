@@ -1,0 +1,6 @@
+clear all;
+
+device = serialport("COM3",9600);
+serialportlist("available")'
+configureTerminator(device,"CR/LF");    %the terminator "Carriage Return" and "Linefeed"
+flush(device); %Flush the serialport object to remove any old data.
