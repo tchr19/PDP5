@@ -1,0 +1,23 @@
+clearvars;
+
+
+a = arduino;
+
+for i = 1:inf
+    for j = 1:inf
+   from_serial_az = readVoltage(a, 'A0')
+   from_serial_el = readVoltage(a,'A1')
+   %b = 25;
+   %c = 1;
+    %d = 50;
+    %pot_val_az = (from_serial_az - min(from_serial_az)*(b-c))/(max(from_serial_az)-min(from_serial_az))+b;
+    %pot_val_el = (from_serial_el - min(from_serial_el)*(d-c))/(max(from_serial_el)-min(from_serial_el))+d;
+    %az = pot_val_az;
+    %el = pot_val_el;
+    %temp(i) = from_serial_az;
+    %temp(j) = from_serial_el;
+
+    %plot(temp); hold on; 
+    pause(0.5);
+    end
+end
