@@ -1,0 +1,34 @@
+int pot_val_az = A0;
+int pot_val_el = A1;
+char ValFromSerial_az;
+char ValFromSerial_el;
+
+void setup() {
+  // put your setup code here, to run once:
+Serial.begin(9600);
+pinMode(pot_val_az, INPUT);
+pinMode(pot_val_el, INPUT);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+pot_val_az = analogRead(A0);
+pot_val_el = analogRead(A1);
+
+pot_val_az = map(pot_val_az, 0, 1023, 1, 25);
+pot_val_el = map(pot_val_el, 0, 1023, 1, 50);
+
+if (Serial.available()){
+    ValFromSerial_az = Serial.read();
+    ValFromSerial_el = Serial.read();
+    }
+
+//analogWrite(az, pot_val_az);
+//analogWrite(el, pot_val_el);
+
+Serial.println(pot_val_az);
+Serial.println(pot_val_el);
+
+delay(10);
+
+}
