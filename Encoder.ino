@@ -66,38 +66,36 @@ void loop() {
         // have been turned Counter clock-wise (CCW) - decrement 
         if (digitalRead(azimuthDT) != azimuthCurrentStateCLK) {
             azimuthCounter --;
-            azimuthCurrentDir = "CCW";
+            azimuthCurrentDir = "CW";
         } else {
             // Encoder is rotating clock-wise. Increment 
             azimuthCounter ++;
-            azimuthCurrentDir = "CW";
+            azimuthCurrentDir = "CCW";
         }
 
-        Serial.print("Azimuth");
-        Serial.print("  |  Direction: ");
+        Serial.print("Direction: ");
         Serial.print(azimuthCurrentDir);
         Serial.print("  |  Counter: ");
         Serial.println(azimuthCounter);
-        
+        Serial.print("  |  Azimuth");
     } else if(elevationCurrentStateCLK != elevationLastStateCLK 
     && elevationCurrentStateCLK == 1) {
         // If DT is different from the CLK cariable, than the encoder
         // have been turned Counter clock-wise (CCW) - decrement 
         if (digitalRead(elevationDT) != elevationCurrentStateCLK) {
             elevationCounter --;
-            elevationCurrentDir = "CCW";
+            elevationCurrentDir = "CW";
         } else {
             // Encoder is rotating clock-wise. Increment 
             elevationCounter ++;
-            elevationCurrentDir = "CW";
+            elevationCurrentDir = "CCW";
         }
 
-        Serial.print("Elevation");
-        Serial.print("  |  Direction: ");
+        Serial.print("Direction: ");
         Serial.print(elevationCurrentDir);
         Serial.print("  |  Counter: ");
         Serial.println(elevationCounter);
-        
+        Serial.print("  |  Elevation");
     }
     // We need to remember last state of the encoder
     azimuthLastStateCLK = azimuthCurrentStateCLK;
