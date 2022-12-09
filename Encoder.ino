@@ -73,13 +73,20 @@ void loop() {
             azimuthCurrentDir = "CW";
         }
 
-        Serial.print("0"); //Azimuth
+
+        //if (digitalRead(azimuthDT == 361){
+        //    azimuthCounter == 0;
+        //}
+
+        //Serial.print("0"); //Azimuth
         //Serial.print("  |  Direction: ");
         //Serial.print(azimuthCurrentDir);
+        //Serial.print(",");
+        Serial.print(azimuthCounter);
         Serial.print(",");
-        Serial.println(azimuthCounter);
-        Serial.write("10");
-        Serial.write("13");
+        Serial.println(elevationCounter);
+        //Serial.write("10");
+        //Serial.write("13");
         
     } else if(elevationCurrentStateCLK != elevationLastStateCLK 
     && elevationCurrentStateCLK == 1) {
@@ -94,13 +101,19 @@ void loop() {
             elevationCurrentDir = "CW";
         }
 
-        Serial.print("1"); //Elevation
+        //if (digitalRead(elevationDT == 361){
+        //    elevationCounter == 0;
+        //}
+
+        //Serial.print("1"); //Elevation
         //Serial.print("  |  Direction: ");
         //Serial.print(elevationCurrentDir);
+        //Serial.print(",");
+        Serial.print(azimuthCounter);
         Serial.print(",");
         Serial.println(elevationCounter);
-        Serial.write("10");
-        Serial.write("13");
+       // Serial.write("10");
+        //Serial.write("13");
     }
     // We need to remember last state of the encoder
     azimuthLastStateCLK = azimuthCurrentStateCLK;
