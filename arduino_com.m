@@ -8,6 +8,8 @@ arduinoObj.UserData = struct("Data",[])
 
 configureCallback(arduinoObj,"terminator",@readEncoderData);
 
+%src = arduinoObj;
+
 function readEncoderData(src, ~)
     % Read the ASCII data from the serialport object.
     data = readline(src)
@@ -15,7 +17,8 @@ function readEncoderData(src, ~)
     %new2 = split(newStr(2),":")
     % Convert the string data to numeric type and save it in the UserData
     % property of the serialport object.
-    src.UserData.Data(end+1) = str2double(data);
+    newStr2 = str2double(newStr);
+    src.UserData.Data(end+1, :) = newStr2';
 
     % Update the Count value of the serialport object.
     %src.UserData.Count = src.UserData.Count + 1;
@@ -29,5 +32,4 @@ function readEncoderData(src, ~)
         %plot(src.UserData.Data(2:end));
     %end
 end
-
 
