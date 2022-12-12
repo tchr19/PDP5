@@ -17,23 +17,23 @@
  */
 
 // Defining the two datapins, DT and CLK for the azimuth encoder (LEFT)
-# define azimuthCLK 2 // Chanel A yellow
-# define azimuthDT 3 // Chanel B blue
+# define azimuthCLK 18 // Chanel B blue
+# define azimuthDT 19 // Chanel A yellow
 
 // Defining the two datapins, DT and CLK for the elevation encoder (RIGHT)
-# define elevationCLK 18 // Chanel A Yellow 
-# define elevationDT 19 // Chanel B Blue
+# define elevationCLK 2 // Chanel A Yellow 
+# define elevationDT 3 // Chanel B Blue
 
 // We define our global variables for the two encoders
 volatile int azimuthCounter = 0;
 volatile int azimuthCurrentStateCLK;
 volatile int azimuthLastStateCLK;
-String azimuthCurrentDir = "";
+//String azimuthCurrentDir = "";
 
 volatile int elevationCounter = 0; 
 volatile int elevationCurrentStateCLK;
 volatile int elevationLastStateCLK;
-String elevationCurrentDir = "";
+//String elevationCurrentDir = "";
 
 void setup() {
   // We start by defining the pins as inputs
@@ -56,6 +56,7 @@ void loop() {
     azimuthCurrentStateCLK = digitalRead(azimuthCLK);
     elevationCurrentStateCLK = digitalRead(elevationCLK);
 
+
     // If the last and the current state of CLK are different, than
     // than change have occured. 
     // React to only 1 state change to avoid double count
@@ -66,17 +67,14 @@ void loop() {
         // have been turned Counter clock-wise (CCW) - decrement 
         if (digitalRead(azimuthDT) != azimuthCurrentStateCLK) {
             azimuthCounter --;
-            azimuthCurrentDir = "CCW";
+            //azimuthCurrentDir = "CCW";
         } else {
             // Encoder is rotating clock-wise. Increment 
             azimuthCounter ++;
-            azimuthCurrentDir = "CW";
+            //azimuthCurrentDir = "CW";
         }
 
 
-        //if (digitalRead(azimuthDT == 361){
-        //    azimuthCounter == 0;
-        //}
 
         //Serial.print("0"); //Azimuth
         //Serial.print("  |  Direction: ");
@@ -94,30 +92,36 @@ void loop() {
         // have been turned Counter clock-wise (CCW) - decrement 
         if (digitalRead(elevationDT) != elevationCurrentStateCLK) {
             elevationCounter --;
-            elevationCurrentDir = "CCW";
+            //elevationCurrentDir = "CCW";
         } else {
             // Encoder is rotating clock-wise. Increment 
             elevationCounter ++;
-            elevationCurrentDir = "CW";
+            //elevationCurrentDir = "CW";
         }
 
-        //if (digitalRead(elevationDT == 361){
-        //    elevationCounter == 0;
-        //}
-
-        //Serial.print("1"); //Elevation
-        //Serial.print("  |  Direction: ");
-        //Serial.print(elevationCurrentDir);
-        //Serial.print(",");
         Serial.print(azimuthCounter);
         Serial.print(",");
         Serial.println(elevationCounter);
-       // Serial.write("10");
-        //Serial.write("13");
     }
+
+    
+    
     // We need to remember last state of the encoder
     azimuthLastStateCLK = azimuthCurrentStateCLK;
     elevationLastStateCLK = elevationCurrentStateCLK;
     delay(1);
 
+    // Elevation mapping
+    if (elevationCounter == -1) {
+      elevationCounter = 49;
+    } else if (elevationCounter == 50) {
+      elevationCounter = 0;
+    }
+
+    // Azimuth mapping
+    if (azimuthCounter == -1) {
+      azimuthCounter = 24;
+    } else if (azimuthCounter == 25) {
+      azimuthCounter = 0;
+    }
 }
