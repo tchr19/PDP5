@@ -1,0 +1,132 @@
+close all 
+clear 
+clc
+
+%%
+fs = 44100;
+
+inout = audioPlayerRecorder('SampleRate',fs);
+inout.RecorderChannelMapping = [1 2];
+
+thirdoctfiltbank = octaveFilterBank('1/3 octave','SampleRate',fs);
+
+f = figure(1);
+delete(f.Children);
+a = axes('Parent',f,'nextplot','add');
+PlotLineL = stairs(a,thirdoctfiltbank.getBandedgeFrequencies,...
+    zeros(length(thirdoctfiltbank.getBandedgeFrequencies),1));
+PlotLineL.LineWidth = 2;
+PlotLineR = stairs(a,thirdoctfiltbank.getBandedgeFrequencies,...
+    zeros(length(thirdoctfiltbank.getBandedgeFrequencies),1));
+PlotLineR.LineWidth = 2;
+
+a.XTick = round(thirdoctfiltbank.getCenterFrequencies);
+a.XLim = [40 20000];
+a.YLim = [-80 40];
+a.XScale = 'log';
+a.XMinorTick = 'off';
+a.Box = 'on';
+%%
+
+sa = spectrumAnalyzer('SampleRate',fs,...
+    'PlotAsTwoSidedSpectrum',false,...
+    'FrequencyScale','log',...
+    'InputDomain','time',...
+    'ViewType','spectrum');
+%%
+LengthMeas = 10;
+BuffsToMeasure = ceil(LengthMeas*fs/inout.BufferSize);
+x = nan(inout.BufferSize,BuffsToMeasure,2);
+InputSig = nan(inout.BufferSize,BuffsToMeasure);
+i = 1;
+
+while i < BuffsToMeasure
+    InputSig(:,i) = pinknoise(inout.BufferSize,1);
+    LeftIn = InputSig(:,i);
+    RightIn = InputSig(:,i);
+    % After making the filters in the last cell comment lines 45 and 46 and
+    % uncomment lines 52 and 53. These two lines filter the signal that
+    % will be sent to the headphones so you should see a flat response,
+    % when the headphones are on valdemar... 
+
+    %LeftIn = LHeqSO(InputSig(:,i));
+    %RightIn = RHeqSO(InputSig(:,i));
+    MicSig = inout([LeftIn RightIn]);
+    x(:,i,1) = MicSig(:,1);
+    x(:,i,2) = MicSig(:,2);
+    X_(:,:,1) = thirdoctfiltbank(x(:,i,1));
+    X_(:,:,2) = thirdoctfiltbank(x(:,i,2));
+    dB_third = roundn(20*log10(squeeze(rms(X_))),-1);
+    PlotLineL.YData = [dB_third(:,1); dB_third(end,1)];
+    PlotLineR.YData = [dB_third(:,2); dB_third(end,2)];
+    drawnow
+    i = i+1;
+end
+release(inout) 
+release(sa)
+%%
+x_L = x(:,~isnan(x(1,:,1)),1);
+x_R = x(:,~isnan(x(1,:,2)),2);
+x_(:,1) = x_L(:);
+x_(:,2) = x_R(:);
+X_L = thirdoctfiltbank(x_(round(1*fs):end-round(1*fs),1));
+X_R = thirdoctfiltbank(x_(round(1*fs):end-round(1*fs),2));
+X_Lrms = rms(X_L);
+X_Rrms = rms(X_R);
+f = round(thirdoctfiltbank.getCenterFrequencies);
+dB_third_L = roundn(20*log10(X_Lrms),-1);
+dB_third_R = roundn(20*log10(X_Rrms),-1);
+PlotLineL.YData = [dB_third_L dB_third_L(end)];
+PlotLineR.YData = [dB_third_R dB_third_R(end)];
+drawnow
+%% Inverse filter... 
+% Invert amplituded for all components above cutoff frequency
+
+Fcuoff = 520;
+lowEnd = X_Lrms(f<=Fcuoff); 
+X_Lrms(f<=Fcuoff) = lowEnd(end);
+X_Lrms = X_Lrms./lowEnd(end);
+
+lowEnd = X_Rrms(f<=Fcuoff); 
+X_Rrms(f<=Fcuoff) = lowEnd(end);
+X_Rrms = X_Rrms./lowEnd(end);
+
+LdB_third = roundn(20*log10(X_Lrms),-1);
+LdB_third_inv = -LdB_third;
+X_Lrms_inv = 10.^(LdB_third_inv/20);
+
+RdB_third = roundn(20*log10(X_Rrms),-1);
+RdB_third_inv = -RdB_third;
+X_Rrms_inv = 10.^(RdB_third_inv/20);
+
+PlotLineL.YData = [LdB_third_inv LdB_third_inv(end)];
+PlotLineR.YData = [RdB_third_inv RdB_third_inv(end)];
+drawnow
+%% Filter design
+% Here the filter is made using the frequency sampling method. We specify
+% the order of the FIR filter the frequency points and the amplitude at
+% those frequencies, and matlab does the rest.
+LFiltAmp = X_Lrms_inv(f>=Fcuoff);
+LFiltAmp(end:end+1) = 0;
+LFiltAmp = [1 LFiltAmp];
+
+RFiltAmp = X_Rrms_inv(f>=Fcuoff);
+RFiltAmp(end:end+1) = 0;
+RFiltAmp = [1 RFiltAmp];
+
+
+
+
+ f_filt = f(f>Fcuoff);
+ f_filt = [0 f_filt fs/2];
+
+LHeq = fdesign.arbmag('N,F,A',50,f_filt,LFiltAmp,fs);
+LHeqSO = design(LHeq,'freqsamp','SystemObject',true);
+
+RHeq = fdesign.arbmag('N,F,A',50,f_filt,RFiltAmp,fs);
+RHeqSO = design(RHeq,'freqsamp','SystemObject',true);  
+
+% This is to see the frequency response of the filters. LHeqSO and RHeqSO
+% are the equalization filter objects that you will use to filter the
+% signal sent to the headphones. 
+fvtool(LHeqSO,RHeqSO)
